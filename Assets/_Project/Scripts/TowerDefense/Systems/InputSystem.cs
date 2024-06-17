@@ -24,33 +24,6 @@ namespace TowerDefense.Systems
         {
             IsMouseDown = InputSystemCapture.IsMouseDown;
             MousePosition = InputSystemCapture.MousePosition;
-
-            if (IsMouseDown)
-            {
-                EntityQuery entityQuery = state.GetEntityQuery(ComponentType.ReadOnly<EnemyTag>());
-
-                var enemyTagArrRW =
-                    new NativeArray<EnemyTag>(entityQuery.CalculateEntityCount(), Allocator.TempJob);
-                var entityList = entityQuery.ToEntityListAsync(Allocator.TempJob, out var jobHandle);
-                state.Dependency = jobHandle;
-
-                state.Dependency = new GetComponentFromEntityForLoopJob<EnemyTag>()
-                {
-                    componentDataArr = enemyTagArrRW,
-                    entityList = entityList,
-                    componentLookup = state.GetComponentLookup<EnemyTag>()
-                }.ScheduleParallel(enemyTagArrRW.Length, 64, state.Dependency);
-
-                state.Dependency.Complete();
-
-                for (int i = 0; i < enemyTagArrRW.Length; i++)
-                {
-                    Debug.Log(enemyTagArrRW[i].index);
-                }
-
-                enemyTagArrRW.Dispose();
-                entityList.Dispose();
-            }
         }
     }
 }

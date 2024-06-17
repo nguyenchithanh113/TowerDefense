@@ -27,7 +27,7 @@ namespace TowerDefense.Systems.Enemy
         {
             EnemySetting enemySetting = SystemAPI.GetSingleton<EnemySetting>();
             
-            if(_enemyQuery.CalculateEntityCount() >= 1000) return;
+            if(_enemyQuery.CalculateEntityCount() >= 10) return;
 
             if (_timer >= _spawnInterval)
             {

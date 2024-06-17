@@ -82,6 +82,11 @@ namespace TowerDefense.Systems.Enemy
                 enemyArr = enemyArr,
                 commandBuffer = ecb.AsParallelWriter()
             }.ScheduleParallel(enemyArr.Length, 64, dependency);
+            
+            dependency.Complete();
+            
+            ecb.Playback(state.EntityManager);
+            ecb.Dispose();
 
             state.Dependency = dependency;
         }

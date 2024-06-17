@@ -1,6 +1,6 @@
 ﻿using Unity.Entities;
 
-namespace TowerDefense.Components
+namespace TowerDefense.Components.Gun
 {
     public struct GunComponent : IComponentData
     {
