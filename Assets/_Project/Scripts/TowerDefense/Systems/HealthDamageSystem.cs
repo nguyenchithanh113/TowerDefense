@@ -1,4 +1,5 @@
 ﻿using TowerDefense.Components;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 
@@ -22,24 +23,52 @@ namespace TowerDefense.Systems
 
         public void OnUpdate(ref SystemState state)
         {
-            state.Dependency = new HealthDamageCalculationJob()
-            {
+            JobHandle dependency = state.Dependency;
 
-            }.ScheduleParallel(_healthDamageQuery, state.Dependency);
+            EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.TempJob);
+
+            dependency = new HealthDamageCalculationJob()
+            {
+            }.ScheduleParallel(_healthDamageQuery, dependency);
+
+            dependency = new HealthCheckJob()
+            {
+                ecbWriter = ecb.AsParallelWriter()
+            }.ScheduleParallel(_healthDamageQuery, dependency);
+            
+            dependency.Complete();
+            ecb.Playback(state.EntityManager);
+            
+            ecb.Dispose();
+
+            state.Dependency = dependency;
         }
     }
 
     public partial struct HealthDamageCalculationJob : IJobEntity
     {
-        public void Execute(Entity entity, ref HealthComponent healthComponent,
+        public void Execute(ref HealthComponent healthComponent,
             ref DynamicBuffer<DamageBufferElement> damageBuffer)
         {
             for (int i = 0; i < damageBuffer.Length; i++)
             {
                 healthComponent.value -= damageBuffer[i].value;
             }
-            
+
             damageBuffer.Clear();
+        }
+    }
+
+    public partial struct HealthCheckJob : IJobEntity
+    {
+        public EntityCommandBuffer.ParallelWriter ecbWriter;
+
+        public void Execute(Entity entity, in HealthComponent healthComponent, [ChunkIndexInQuery] int chunkIndex)
+        {
+            if (healthComponent.value <= 0)
+            {
+                ecbWriter.DestroyEntity(chunkIndex, entity);
+            }
         }
     }
 }
