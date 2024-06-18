@@ -1,5 +1,6 @@
 ﻿using Unity.Collections;
 using Unity.Entities;
+using Unity.Transforms;
 
 namespace EcsExtension
 {
@@ -16,5 +17,14 @@ namespace EcsExtension
 
             return new NativeArray<T>(count, allocator);
         }
+
+        public static bool IsEntityWithTransformExist(ComponentLookup<LocalTransform> componentLookup, Entity entity)
+        {
+            return componentLookup.HasComponent(entity);
+        }
+        // public static bool IsEntityWithTransformExist(ComponentLookup<LocalToWorld> componentLookup, Entity entity)
+        // {
+        //     return componentLookup.HasComponent(entity);
+        // }
     }
 }

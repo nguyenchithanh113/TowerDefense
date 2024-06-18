@@ -7,6 +7,8 @@ namespace TowerDefense.Authorings.Gun
     public class NormalGunAuthoring : MonoBehaviour
     {
         public GameObject projectile;
+
+        public float cooldown = 1f;
     }
 
     public class NormalGunAuthoringBaker : Baker<NormalGunAuthoring>
@@ -17,7 +19,9 @@ namespace TowerDefense.Authorings.Gun
             
             GunComponent gunComponent = new GunComponent()
             {
-                projectilePrefab = GetEntity(authoring.projectile, TransformUsageFlags.Dynamic)
+                projectilePrefab = GetEntity(authoring.projectile, TransformUsageFlags.Dynamic),
+                cooldown = authoring.cooldown,
+                cooldownTimer = 0,
             };
             
             AddComponent(entity, gunComponent);
