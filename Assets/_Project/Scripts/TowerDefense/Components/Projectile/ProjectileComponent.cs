@@ -6,5 +6,7 @@ namespace TowerDefense.Components.Projectile
     {
         public float speed;
         public float damage;
+
+        public Entity explodeParticlePrefab;
     }
 }

@@ -93,7 +93,7 @@ namespace TowerDefense.Systems.Tower
                 dt = SystemAPI.Time.DeltaTime,
                 ecbWrite = ecb.AsParallelWriter(),
                 targetEntityLookup = state.GetComponentLookup<TargetEntity>(),
-                damageBufferLookup = state.GetBufferLookup<DamageBufferElement>(),
+                //damageBufferLookup = state.GetBufferLookup<DamageBufferElement>(),
                 gunComponentLookup = state.GetComponentLookup<GunComponent>(),
             }.ScheduleParallel(_towerWithGunQuery, dependency);
             dependency.Complete();
@@ -168,7 +168,7 @@ namespace TowerDefense.Systems.Tower
                         LocalToWorld targetLtw = localToWorldLookup.GetRefRO(targetEntity.value).ValueRO;
                         float distanceToTargetSq = math.distancesq(targetLtw.Position, localToWorld.Position);
 
-                        if (distanceToTargetSq > 5.55f * 5.55f)
+                        if (distanceToTargetSq > 5.8f * 5.8f)
                         {
                             isTargetValid = false;
                         }
@@ -177,7 +177,7 @@ namespace TowerDefense.Systems.Tower
                     if (!isTargetValid)
                     {
                         ecbWriter.RemoveComponent<TargetEntity>(chunkIndex, gunEntity);
-                        Debug.Log("Remove target");
+                            //Debug.Log("Remove target");
                     }
                 }
             }
@@ -242,7 +242,6 @@ namespace TowerDefense.Systems.Tower
     public partial struct AttackTargetForTowerGunsJob : IJobEntity
     {
         [ReadOnly] public ComponentLookup<TargetEntity> targetEntityLookup;
-        [ReadOnly] public BufferLookup<DamageBufferElement> damageBufferLookup;
         [NativeDisableParallelForRestriction] public ComponentLookup<GunComponent> gunComponentLookup;
 
         public EntityCommandBuffer.ParallelWriter ecbWrite;
@@ -260,17 +259,14 @@ namespace TowerDefense.Systems.Tower
                 {
                     if (targetEntityLookup.TryGetComponent(gunEntity, out TargetEntity targetEntity))
                     {
-                        if (damageBufferLookup.TryGetBuffer(targetEntity.value, out var damageBuffer))
+                        Entity projectilePrefab = ecbWrite.Instantiate(chunkIndex, gunComponentRW.projectilePrefab);
+                        ecbWrite.AddComponent(chunkIndex, projectilePrefab, new TargetEntity()
                         {
-                            DamageBufferElement damageBufferElement = new DamageBufferElement() { value = 10 };
-                            ecbWrite.AppendToBuffer(chunkIndex, targetEntity.value, damageBufferElement);
-
-                            gunComponentRW.cooldownTimer = gunComponentRW.cooldown;
-                        }
-                        else
-                        {
-                            Debug.LogError("Target to Attack does not have damageBuffer");
-                        }
+                            value = targetEntity.value
+                        });
+                        ecbWrite.SetComponent(chunkIndex, projectilePrefab, LocalTransform.FromPosition(0f,0.5f,0f));
+                        
+                        gunComponentRW.cooldownTimer = gunComponentRW.cooldown;
                     }
                 }
 

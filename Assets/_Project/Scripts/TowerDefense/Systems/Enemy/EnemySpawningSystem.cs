@@ -13,30 +13,39 @@ namespace TowerDefense.Systems.Enemy
         private float _timer;
         private float _spawnInterval;
         private int _entityCount;
+
+        private Random _rand;
         
         public void OnCreate(ref SystemState state)
         {
+            _rand = new Random((uint)UnityEngine.Random.Range(0, 10000));
+            
             state.RequireForUpdate<EnemySetting>();
 
             _enemyQuery = state.GetEntityQuery(ComponentType.ReadOnly(typeof(EnemyTag)));
 
-            _spawnInterval = 0.05f;
+            _spawnInterval = 0.02f;
         }
 
         public void OnUpdate(ref SystemState state)
         {
             EnemySetting enemySetting = SystemAPI.GetSingleton<EnemySetting>();
             
-            if(_enemyQuery.CalculateEntityCount() >= 10) return;
+            if(_enemyQuery.CalculateEntityCount() >= 5000) return;
 
             if (_timer >= _spawnInterval)
             {
                 EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.Temp);
+
+                float2 randomDirection = _rand.NextFloat2() * 2 - new float2(1f, 1f);
+                randomDirection = math.normalizesafe(randomDirection);
+                float randomRange = _rand.NextFloat(10, 14);
+                float2 randPos = randomDirection * randomRange;
                 
                 Entity spawn = ecb.Instantiate(enemySetting.enemyPrefab);
                 ecb.SetComponent(spawn, new LocalTransform()
                 {
-                    Position = new float3(0,0,10),
+                    Position = new float3(randPos.x,0,randPos.y),
                     Rotation = quaternion.identity,
                     Scale = 1f
                 });
