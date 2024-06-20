@@ -1,5 +1,6 @@
 ﻿using TowerDefense.Components;
 using TowerDefense.Components.Enemy;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -27,6 +28,7 @@ namespace TowerDefense.Systems.Enemy
             _spawnInterval = 0.02f;
         }
 
+        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             EnemySetting enemySetting = SystemAPI.GetSingleton<EnemySetting>();

@@ -63,6 +63,7 @@ namespace TowerDefense.Systems.Tower
             state.Dependency = dependency;
         }
 
+        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             JobHandle dependency = state.Dependency;

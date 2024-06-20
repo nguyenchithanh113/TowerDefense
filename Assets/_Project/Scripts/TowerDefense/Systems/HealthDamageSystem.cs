@@ -1,4 +1,5 @@
 ﻿using TowerDefense.Components;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
@@ -8,7 +9,7 @@ namespace TowerDefense.Systems
     public partial struct HealthDamageSystem : ISystem
     {
         private EntityQuery _healthDamageQuery;
-
+        
         public void OnCreate(ref SystemState state)
         {
             _healthDamageQuery = state.GetEntityQuery(new EntityQueryDesc()
@@ -21,6 +22,7 @@ namespace TowerDefense.Systems
             });
         }
 
+        [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
             JobHandle dependency = state.Dependency;
@@ -45,6 +47,7 @@ namespace TowerDefense.Systems
         }
     }
 
+    [BurstCompile]
     public partial struct HealthDamageCalculationJob : IJobEntity
     {
         public void Execute(ref HealthComponent healthComponent,
@@ -59,6 +62,7 @@ namespace TowerDefense.Systems
         }
     }
 
+    [BurstCompile]
     public partial struct HealthCheckJob : IJobEntity
     {
         public EntityCommandBuffer.ParallelWriter ecbWriter;
