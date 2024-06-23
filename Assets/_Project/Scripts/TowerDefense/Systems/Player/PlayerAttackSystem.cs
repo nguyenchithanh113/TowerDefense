@@ -1,4 +1,5 @@
-﻿using TowerDefense.Components;
+﻿using ProjectDawn.Mathematics;
+using TowerDefense.Components;
 using TowerDefense.Components.Gun;
 using TowerDefense.Components.Player;
 using TowerDefense.Components.Projectile;
@@ -70,23 +71,45 @@ namespace TowerDefense.Systems.Player
             {
                 if (shoot.cooldownTimer <= 0)
                 {
-                    Entity projectileEntity = ecb.Instantiate(projectilePrefab);
+                    float3 forward = localTransform.Forward();
 
-                    LocalTransform projectileLocalTransform = new LocalTransform()
+                    NativeArray<float2> directionArray = new NativeArray<float2>(9, Allocator.Temp);
+
+
+                    int count = 0;
+                    for (int i = -40; i <= 40; i += 10)
                     {
-                        Position = localTransform.Position,
-                        Rotation = localTransform.Rotation,
-                        Scale = 1f
-                    };
+                        directionArray[count] = math2.rotate(new float2(forward.x, forward.z), math.TORADIANS * i);
+                        count++;
+                    }
+
+                    for (int i = 0; i < 9; i++)
+                    {
+                        float3 direction = new float3(directionArray[i].x, 0, directionArray[i].y);
+                        quaternion rot = quaternion.LookRotation(direction, math.up());
+                        
+                        Entity projectileEntity = ecb.Instantiate(projectilePrefab);
+
+                        LocalTransform projectileLocalTransform = new LocalTransform()
+                        {
+                            Position = new float3(localTransform.Position.x, 0.5f, localTransform.Position.z),
+                            Rotation = rot,
+                            Scale = 1f
+                        };
                     
-                    ecb.AddComponent(projectileEntity, projectileLocalTransform);
+                        ecb.AddComponent(projectileEntity, projectileLocalTransform);
+                        ecb.AddComponent(projectileEntity, new AutoDestroyComponent()
+                        {
+                            timer = 10,
+                        });
+                    }
 
                     shoot.cooldownTimer = shoot.cooldown;
+
+                    directionArray.Dispose();
                 }
-                else
-                {
-                    shoot.cooldownTimer -= dt;
-                }
+
+                shoot.cooldownTimer -= dt;
             }
         }
     }

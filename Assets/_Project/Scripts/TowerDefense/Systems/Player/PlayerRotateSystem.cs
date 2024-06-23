@@ -35,11 +35,13 @@ namespace TowerDefense.Systems.Player
             
             if(joystickDirection.Equals(float2.zero)) return;
 
-            new PlayerTurretRotateJob()
+            dependency = new PlayerTurretRotateJob()
             {
                 dt = SystemAPI.Time.DeltaTime,
                 rotateDirection = joystickDirection,
             }.Schedule(_playerTurretQuery,dependency);
+
+            state.Dependency = dependency;
         }
 
         [BurstCompile]
@@ -58,10 +60,10 @@ namespace TowerDefense.Systems.Player
         {
             //math.sign()
             quaternion from = localTransform.Rotation;
-            quaternion to = quaternion.LookRotation(new float3(rotateDirection.x, 0, rotateDirection.y),
-                new float3(1f, 1f, 1f));
+            quaternion to = quaternion.LookRotation(math.normalizesafe(new float3(rotateDirection.x, 0, rotateDirection.y)),
+                new float3(0, 1f, 0));
 
-            quaternion targetRotate = MathHelper.RotateTowards(from, to, 90 * dt);
+            quaternion targetRotate = MathHelper.RotateTowards(from, to, 10 * dt);
             localTransform.Rotation = targetRotate;
         }
     }

@@ -14,7 +14,7 @@ namespace TowerDefense
 
         private void Awake()
         {
-            
+            Application.targetFrameRate = 60;
         }
 
         private void Update()
@@ -23,7 +23,7 @@ namespace TowerDefense
             IsMouseUp = Input.GetMouseButtonUp(0);
             MousePosition = Input.mousePosition;
 
-            //JoystickDirection = _joystick.Direction;
+            JoystickDirection = _joystick.Direction;
 
         }
 

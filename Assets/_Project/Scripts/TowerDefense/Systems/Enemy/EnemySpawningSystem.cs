@@ -33,28 +33,31 @@ namespace TowerDefense.Systems.Enemy
         {
             EnemySetting enemySetting = SystemAPI.GetSingleton<EnemySetting>();
             
-            if(_enemyQuery.CalculateEntityCount() >= 5000) return;
+            if(_enemyQuery.CalculateEntityCount() >= 100000) return;
 
             if (_timer >= _spawnInterval)
             {
                 EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.Temp);
 
-                float2 randomDirection = _rand.NextFloat2() * 2 - new float2(1f, 1f);
-                randomDirection = math.normalizesafe(randomDirection);
-                float randomRange = _rand.NextFloat(10, 14);
-                float2 randPos = randomDirection * randomRange;
+                for (int i = 0; i < 10; i++)
+                {
+                    float2 randomDirection = _rand.NextFloat2() * 2 - new float2(1f, 1f);
+                    randomDirection = math.normalizesafe(randomDirection);
+                    float randomRange = _rand.NextFloat(35, 50);
+                    float2 randPos = randomDirection * randomRange;
                 
-                Entity spawn = ecb.Instantiate(enemySetting.enemyPrefab);
-                ecb.SetComponent(spawn, new LocalTransform()
-                {
-                    Position = new float3(randPos.x,0,randPos.y),
-                    Rotation = quaternion.identity,
-                    Scale = 1f
-                });
-                ecb.SetComponent(spawn, new EnemyTag()
-                {
-                    index = _entityCount
-                });
+                    Entity spawn = ecb.Instantiate(enemySetting.enemyPrefab);
+                    ecb.SetComponent(spawn, new LocalTransform()
+                    {
+                        Position = new float3(randPos.x,0,randPos.y),
+                        Rotation = quaternion.identity,
+                        Scale = 1f
+                    });
+                    ecb.SetComponent(spawn, new EnemyTag()
+                    {
+                        index = _entityCount
+                    });
+                }
                 
                 ecb.Playback(state.EntityManager);
                 _timer = 0;

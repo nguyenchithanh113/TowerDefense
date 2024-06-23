@@ -1,4 +1,5 @@
 ﻿using Unity.Entities;
+using Unity.Mathematics;
 
 namespace TowerDefense.Components.Projectile
 {
@@ -6,6 +7,8 @@ namespace TowerDefense.Components.Projectile
     {
         public float speed;
         public float damage;
+
+        public float3 lastPosition;
 
         public Entity explodeParticlePrefab;
     }

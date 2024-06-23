@@ -23,7 +23,8 @@ namespace TowerDefense.Systems.Enemy
                 All = new[]
                 {
                     ComponentType.ReadOnly<EnemyTag>(),
-                    ComponentType.ReadWrite<LocalTransform>()
+                    ComponentType.ReadWrite<LocalTransform>(),
+                    ComponentType.ReadOnly<Speed>(),
                 }
             };
 
@@ -53,7 +54,6 @@ namespace TowerDefense.Systems.Enemy
             state.Dependency = new MoveToTargetJob()
             {
                 targetPos = playerLocalTransform.Position,
-                moveSpeed = 2,
                 dt = SystemAPI.Time.DeltaTime
             }.ScheduleParallel(_enemyEntityQuery, state.Dependency);
         }
@@ -72,15 +72,17 @@ namespace TowerDefense.Systems.Enemy
     public partial struct MoveToTargetJob : IJobEntity
     {
         public float3 targetPos;
-
-        public float moveSpeed;
+        
         public float dt;
 
-        public void Execute(ref LocalTransform localTransform)
+        public void Execute(ref LocalTransform localTransform, in Speed speed)
         {
-            float3 direction = math.normalizesafe(targetPos - localTransform.Position);
-
-            localTransform.Position += direction * moveSpeed * dt;
+            if (math.distancesq(targetPos, localTransform.Position) > 1.5f * 1.5f)
+            {
+                float3 direction = math.normalizesafe(targetPos - localTransform.Position);
+                
+                localTransform.Position += direction * speed.value * dt;
+            }
         }
     }
 
